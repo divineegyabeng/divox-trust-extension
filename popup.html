@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DivoX Trust</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1a56db;--blue-dark:#1240a8;--blue-xdark:#0d2e7a;
+  --red:#dc2626;--red-light:#fef2f2;
+  --gray:#f8fafc;--gray2:#e2e8f0;--gray3:#94a3b8;--text:#1e293b;--text2:#475569;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;width:340px;color:var(--text);background:#fff}
+
+.header{background:var(--blue-xdark);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{color:#fff;font-size:1rem;font-weight:800}
+.logo em{color:#f87171;font-style:normal}
+.open-site{color:rgba(255,255,255,0.7);font-size:0.75rem;text-decoration:none;transition:color 0.2s}
+.open-site:hover{color:#fff}
+
+.body{padding:14px}
+
+.input-wrap{margin-bottom:10px}
+.input-wrap input, .input-wrap textarea{width:100%;border:1.5px solid var(--gray2);border-radius:8px;padding:10px 12px;font-size:0.83rem;font-family:inherit;outline:none;color:var(--text);resize:none}
+.input-wrap input:focus, .input-wrap textarea:focus{border-color:var(--blue)}
+.input-wrap textarea{min-height:70px}
+
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.etab{flex:1;padding:7px;text-align:center;font-size:0.75rem;font-weight:700;cursor:pointer;border-radius:6px;border:1.5px solid var(--gray2);color:var(--gray3);transition:all 0.2s}
+.etab.active{border-color:var(--blue);color:var(--blue);background:#e8f0fe}
+
+.scan-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:11px;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:background 0.2s}
+.scan-btn:hover{background:var(--blue-dark)}
+.scan-btn:disabled{background:var(--gray3);cursor:not-allowed}
+
+.loading{text-align:center;padding:1.5rem;display:none}
+.spinner{width:28px;height:28px;border:3px solid var(--gray2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:0.82rem;color:var(--gray3)}
+
+.result{display:none;margin-top:12px;border-radius:10px;overflow:hidden;border:1px solid var(--gray2)}
+.result.show{display:block}
+.result-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.risk-safe .result-header{background:#f0fdf4;border-bottom:1px solid #bbf7d0}
+.risk-low .result-header{background:#fefce8;border-bottom:1px solid #fde047}
+.risk-medium .result-header{background:#fff7ed;border-bottom:1px solid #fdba74}
+.risk-high .result-header{background:var(--red-light);border-bottom:1px solid #fca5a5}
+.risk-label{font-weight:800;font-size:0.85rem}
+.risk-safe .risk-label{color:#16a34a}
+.risk-low .risk-label{color:#a16207}
+.risk-medium .risk-label{color:#c2410c}
+.risk-high .risk-label{color:var(--red)}
+.risk-pct{font-size:1.1rem;font-weight:900}
+.risk-safe .risk-pct{color:#16a34a}
+.risk-low .risk-pct{color:#a16207}
+.risk-medium .risk-pct{color:#c2410c}
+.risk-high .risk-pct{color:var(--red)}
+.result-body{padding:10px 14px}
+.summary{font-size:0.82rem;line-height:1.6;color:var(--text);background:var(--gray);border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue);margin-bottom:8px}
+.verdict{font-size:0.8rem;font-weight:600;padding:8px 12px;border-radius:7px}
+.risk-safe .verdict{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.risk-low .verdict{background:#fefce8;color:#854d0e;border:1px solid #fde047}
+.risk-medium .verdict{background:#fff7ed;color:#9a3412;border:1px solid #fdba74}
+.risk-high .verdict{background:var(--red-light);color:#991b1b;border:1px solid #fca5a5}
+
+.share-btn{width:100%;background:transparent;color:var(--blue);border:1.5px solid var(--blue);padding:8px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s}
+.share-btn:hover{background:#e8f0fe}
+
+.footer{padding:10px 14px;border-top:1px solid var(--gray2);text-align:center}
+.footer a{font-size:0.75rem;color:var(--blue);text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">DivoX <em>Trust</em></div>
+  <a class="open-site" href="https://divoxtrust.vercel.app" target="_blank">Open full site</a>
+</div>
+
+<div class="body">
+  <div class="tabs">
+    <div class="etab active" onclick="switchTab('url')">URL / Link</div>
+    <div class="etab" onclick="switchTab('message')">Message</div>
+  </div>
+
+  <div class="input-wrap" id="input-url">
+    <input type="text" id="url-input" placeholder="Paste a suspicious link here...">
+  </div>
+  <div class="input-wrap" id="input-message" style="display:none">
+    <textarea id="msg-input" placeholder="Paste a suspicious message here..."></textarea>
+  </div>
+
+  <button class="scan-btn" id="scan-btn" onclick="runScan()">Scan Now</button>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Analysing...</p>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-header">
+      <div class="risk-label" id="risk-label">SAFE</div>
+      <div class="risk-pct" id="risk-pct">0%</div>
+    </div>
+    <div class="result-body">
+      <div class="summary" id="summary"></div>
+      <div class="verdict" id="verdict"></div>
+      <button class="share-btn" onclick="shareResult()">Share this result</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://divoxtrust.vercel.app" target="_blank">divoxtrust.vercel.app</a>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
